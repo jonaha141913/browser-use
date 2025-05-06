@@ -34,7 +34,7 @@ class TestControllerIntegration:
 		yield loop
 		loop.close()
 
-	@pytest.fixture(scope='module')
+	@pytest.fixture(scope='function')
 	async def browser(self, event_loop):
 		"""Create and provide a Browser instance with security disabled."""
 		browser_instance = Browser(
