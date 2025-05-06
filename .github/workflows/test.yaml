@@ -1,15 +1,6 @@
 name: test
 
-on:
-  push:
-    branches:
-      - main
-      - stable
-      - 'releases/**'
-    tags:
-      - '*'
-  pull_request:
-  workflow_dispatch:
+on: push
     
 jobs:
   tests:
