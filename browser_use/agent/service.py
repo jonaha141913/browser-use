@@ -1778,12 +1778,7 @@ class Agent(Generic[Context]):
 		Verify that the LLM API keys are setup and the LLM API is responding properly.
 		Also handles tool calling method detection if in auto mode.
 		"""
-		method = None if self.settings.tool_calling_method == 'auto' else self.settings.tool_calling_method
-		capabilities = get_llm_capabilities(self.llm, method)
-		if capabilities.error:
-			raise ConnectionError('Failed to connect to LLM. Please check your API key and network connection.')
-		capabilities.log()
-		self.tool_calling_method = capabilities.supported_tool_calling_method
+		self.tool_calling_method = self._set_tool_calling_method()
 
 		# Skip verification if already done
 		if getattr(self.llm, '_verified_api_keys', None) is True or SKIP_LLM_API_KEY_VERIFICATION:
