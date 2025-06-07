@@ -5,6 +5,7 @@ You must have a running Neo4j instance and the necessary environment variables s
 
 import asyncio
 import os
+
 from dotenv import load_dotenv
 
 from browser_use import Agent
