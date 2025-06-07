@@ -27,40 +27,40 @@ agent_llm = ChatOpenAI(model='gpt-4o-mini', temperature=0.0, api_key=OPENAI_API_
 AGENT_ID_FOR_MEM0 = 'user_browser_task_graph_v1'
 
 graph_memory_config = MemoryConfig(
-	# Main LLM instance for Mem0
-	llm_instance=agent_llm,
-	agent_id=AGENT_ID_FOR_MEM0,
-	memory_interval=2,
-	# --- Graph Store Configuration ---
-	graph_store_provider='neo4j',
-	graph_store_config_override={
-		'url': NEO4J_URI,
-		'username': NEO4J_USERNAME,
-		'password': NEO4J_PASSWORD,
-	},
-	# Optional: Override LLM specifically for graph operations within Mem0.
-	# This tells Mem0 to use `mem0_internal_graph_llm` for its graph-related LLM calls.
-	graph_store_llm_config_override={
-		'provider': 'openai',
-		'config': {'model': 'gpt-4o-mini', 'api_key': OPENAI_API_KEY, 'temperature': 0.0},
-	},
-	# Optional: Custom prompt for Mem0's graph entity/relationship extraction.
-	graph_store_custom_prompt=(
-		'From the conversation and browser interactions, extract entities like URLs, search queries, '
-		'page titles, section titles, key facts extracted, user intents, and agent actions. '
-		"Use 'USER_ID' for the user ('user_browser_task_graph_v1' in this case) and 'AGENT' for the assistant. "
-		'Capture relationships such as: '
-		"'AGENT NAVIGATED_TO URL', 'AGENT SEARCHED_FOR Query', 'URL HAS_TITLE PageTitle', "
-		"'PAGE_CONTENT_CONTAINS Fact', 'AGENT_EXTRACTED Fact FROM URL', "
-		"'USER_ID TASKED_AGENT_WITH UserTask', 'AGENT_ACTION_PERFORMED ActionDetail'. "
-		'Focus on the sequence of web operations and information flow.'
-	),
+    # Main LLM instance for Mem0
+    llm_instance=agent_llm,
+    agent_id=AGENT_ID_FOR_MEM0,
+    memory_interval=2,
+    # --- Graph Store Configuration ---
+    graph_store_provider='neo4j',
+    graph_store_config_override={
+        'url': NEO4J_URI,
+        'username': NEO4J_USERNAME,
+        'password': NEO4J_PASSWORD,
+    },
+    # Optional: Override LLM specifically for graph operations within Mem0.
+    # This tells Mem0 to use `mem0_internal_graph_llm` for its graph-related LLM calls.
+    graph_store_llm_config_override={
+        'provider': 'openai',
+        'config': {'model': 'gpt-4o-mini', 'api_key': OPENAI_API_KEY, 'temperature': 0.0},
+    },
+    # Optional: Custom prompt for Mem0's graph entity/relationship extraction.
+    graph_store_custom_prompt=(
+        'From the conversation and browser interactions, extract entities like URLs, search queries, '
+        'page titles, section titles, key facts extracted, user intents, and agent actions. '
+        "Use 'USER_ID' for the user ('user_browser_task_graph_v1' in this case) and 'AGENT' for the assistant. "
+        'Capture relationships such as: '
+        "'AGENT NAVIGATED_TO URL', 'AGENT SEARCHED_FOR Query', 'URL HAS_TITLE PageTitle', "
+        "'PAGE_CONTENT_CONTAINS Fact', 'AGENT_EXTRACTED Fact FROM URL', "
+        "'USER_ID TASKED_AGENT_WITH UserTask', 'AGENT_ACTION_PERFORMED ActionDetail'. "
+        'Focus on the sequence of web operations and information flow.'
+    ),
 )
 
 TASK_DESCRIPTION = (
-	'Go to en.wikipedia.org. Search for "Persistent Memory". '
-	'Navigate to the "Persistent Memory" Wikipedia page. '
-	'Find and remember the title of the first main section of content on that page. '
+    'Go to en.wikipedia.org. Search for "Persistent Memory". '
+    'Navigate to the "Persistent Memory" Wikipedia page. '
+    'Find and remember the title of the first main section of content on that page. '
 	'Then, state what you found.'
 )
 
