@@ -7,6 +7,8 @@ import os
 import platform
 from typing import TYPE_CHECKING
 
+from PIL import Image, ImageFont
+
 from browser_use.agent.views import AgentHistoryList
 from browser_use.config import CONFIG
 
