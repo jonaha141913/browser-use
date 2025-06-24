@@ -291,7 +291,7 @@ class Controller(Generic[Context]):
 			element_node = await browser_session.get_dom_element_by_index(params.index)
 			assert element_node is not None, f'Element with index {params.index} does not exist'
 			try:
-				await browser_session._input_text_element_node(element_node, params.text)
+				await browser_session._input_text_element_node(element_node, params.text)  # type: ignore
 			except Exception:
 				msg = f'Failed to input text into element {params.index}.'
 				return ActionResult(error=msg)
@@ -478,7 +478,7 @@ Explain the content of the page and that the requested information is not availa
 			'Get the accessibility tree of the page in the format "role name" with the number_of_elements to return',
 		)
 		async def get_ax_tree(number_of_elements: int, page: Page):
-			node = await page.accessibility.snapshot(interesting_only=True)
+			node = await page.accessibility.snapshot(interesting_only=True)  # type: ignore
 
 			def flatten_ax_tree(node, lines):
 				if not node:

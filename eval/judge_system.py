@@ -26,7 +26,10 @@ from pathlib import Path
 from typing import Any
 
 from langchain_core.language_models.chat_models import BaseChatModel
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 logger = logging.getLogger(__name__)
 

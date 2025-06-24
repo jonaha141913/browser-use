@@ -7,6 +7,8 @@ import os
 import platform
 from typing import TYPE_CHECKING
 
+from PIL import Image, ImageFont
+
 from browser_use.agent.views import AgentHistoryList
 from browser_use.config import CONFIG
 
@@ -250,7 +252,7 @@ def _add_overlay_to_image(
 ) -> Image.Image:
 	"""Add step number and goal overlay to an image."""
 
-	from PIL import Image, ImageDraw
+	from PIL import ImageDraw
 
 	goal_text = decode_unicode_escapes_to_utf8(goal_text)
 	image = image.convert('RGBA')
