@@ -513,10 +513,7 @@ class Registry(Generic[Context]):
 				f'{name.title().replace("_", "")}ActionModel',
 				__base__=ActionModel,
 				**{
-					name: (
-						action.param_model,
-						Field(description=action.description),
-					)
+					name: (action.param_model, Field(description=action.description)),
 				},
 			)
 			individual_action_models.append(individual_model)
@@ -538,19 +535,22 @@ class Registry(Generic[Context]):
 
 				def get_index(self) -> int | None:
 					"""Delegate get_index to the underlying action model"""
-					if hasattr(self.root, 'get_index'):
-						return self.root.get_index()
+					root = self.root
+					if hasattr(root, 'get_index'):
+						return root.get_index()
 					return None
 
 				def set_index(self, index: int):
 					"""Delegate set_index to the underlying action model"""
-					if hasattr(self.root, 'set_index'):
-						self.root.set_index(index)
+					root = self.root
+					if hasattr(root, 'set_index'):
+						root.set_index(index)
 
 				def model_dump(self, **kwargs):
 					"""Delegate model_dump to the underlying action model"""
-					if hasattr(self.root, 'model_dump'):
-						return self.root.model_dump(**kwargs)
+					root = self.root
+					if hasattr(root, 'model_dump'):
+						return root.model_dump(**kwargs)
 					return super().model_dump(**kwargs)
 
 			# Set the name for better debugging
