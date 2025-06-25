@@ -267,8 +267,6 @@ def are_images_identical(img_path1: str, img_path2: str) -> bool:
 	except Exception as e:
 		logger.warning(f'Failed to compare images {img_path1} and {img_path2}: {e}')
 		return False
-
-
 def filter_images(screenshot_paths: list[str], max_images: int) -> list[str]:
 	"""
 	Filter screenshot paths to:
