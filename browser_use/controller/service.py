@@ -477,19 +477,26 @@ Explain the content of the page and that the requested information is not availa
 			'Get the accessibility tree of the page in the format "role name" with the number_of_elements to return',
 		)
 		async def get_ax_tree(number_of_elements: int, page: Page):
-			node = await page.accessibility.snapshot(interesting_only=True)
+			# Page.accessibility was removed from Playwright; query the accessibility tree via CDP instead
+			cdp_session = await page.context.new_cdp_session(page)
+			try:
+				ax_tree = await cdp_session.send('Accessibility.getFullAXTree')
+			finally:
+				try:
+					await cdp_session.detach()
+				except Exception:
+					pass
 
-			def flatten_ax_tree(node, lines):
-				if not node:
-					return
-				role = node.get('role', '')
-				name = node.get('name', '')
-				lines.append(f'{role} {name}')
-				for child in node.get('children', []):
-					flatten_ax_tree(child, lines)
+			def flatten_ax_tree(ax_nodes, lines):
+				for ax_node in ax_nodes:
+					if not ax_node or ax_node.get('ignored'):
+						continue
+					role = (ax_node.get('role') or {}).get('value', '')
+					name = (ax_node.get('name') or {}).get('value', '')
+					lines.append(f'{role} {name}')
 
 			lines = []
-			flatten_ax_tree(node, lines)
+			flatten_ax_tree(ax_tree.get('nodes', []), lines)
 			msg = '\n'.join(lines)
 			logger.info(msg)
 			return ActionResult(
