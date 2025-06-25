@@ -119,4 +119,4 @@ class ProductTelemetry:
 					self._curr_user_id = f.read()
 		except Exception:
 			self._curr_user_id = 'UNKNOWN_USER_ID'
-		return self._curr_user_id
+		return self._curr_user_id or 'UNKNOWN_USER_ID'

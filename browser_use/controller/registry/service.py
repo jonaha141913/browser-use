@@ -5,9 +5,9 @@ import logging
 import re
 from collections.abc import Callable
 from inspect import Parameter, iscoroutinefunction, signature
-from typing import Any, Generic, Optional, TypeVar, Union, get_args, get_origin
+from typing import Any, Generic, TypeVar, Union, get_args, get_origin
 
-from pydantic import BaseModel, Field, RootModel, create_model
+from pydantic import BaseModel, Field, RootModel
 
 from browser_use.browser import BrowserSession
 from browser_use.browser.types import Page
@@ -61,8 +61,8 @@ class Registry(Generic[Context]):
 		self,
 		func: Callable,
 		description: str,
-		param_model: type[BaseModel] | None = None,
-	) -> tuple[Callable, type[BaseModel]]:
+		param_model: type[ActionModel] | None = None,
+	) -> tuple[Callable, type[ActionModel]]:
 		"""
 		Normalize action function to accept only kwargs.
 
@@ -243,7 +243,7 @@ class Registry(Generic[Context]):
 				return await asyncio.to_thread(func, *call_args)
 
 		# Update wrapper signature to be kwargs-only
-		new_params = [Parameter('params', Parameter.KEYWORD_ONLY, default=None, annotation=Optional[param_model])]
+		new_params = [Parameter('params', Parameter.KEYWORD_ONLY, default=None, annotation=param_model)]
 
 		# Add special params as keyword-only
 		for sp in special_params:
@@ -257,7 +257,7 @@ class Registry(Generic[Context]):
 		return normalized_wrapper, param_model
 
 	# @time_execution_sync('--create_param_model')
-	def _create_param_model(self, function: Callable) -> type[BaseModel]:
+	def _create_param_model(self, function: Callable) -> type[ActionModel]:
 		"""Creates a Pydantic model from function signature"""
 		sig = signature(function)
 		special_param_names = set(SpecialActionParameters.model_fields.keys())
@@ -266,7 +266,6 @@ class Registry(Generic[Context]):
 			for name, param in sig.parameters.items()
 			if name not in special_param_names
 		}
-		# TODO: make the types here work
 		return create_model(
 			f'{function.__name__}_parameters',
 			__base__=ActionModel,
@@ -276,11 +275,11 @@ class Registry(Generic[Context]):
 	def action(
 		self,
 		description: str,
-		param_model: type[BaseModel] | None = None,
+		param_model: type[ActionModel] | None = None,
 		domains: list[str] | None = None,
 		allowed_domains: list[str] | None = None,
 		page_filter: Callable[[Any], bool] | None = None,
-	):
+	) -> Callable[[Callable], Callable]:
 		"""Decorator for registering actions"""
 		# Handle aliases: domains and allowed_domains are the same parameter
 		if allowed_domains is not None and domains is not None:
@@ -288,7 +287,7 @@ class Registry(Generic[Context]):
 
 		final_domains = allowed_domains if allowed_domains is not None else domains
 
-		def decorator(func: Callable):
+		def decorator(func: Callable) -> Callable:
 			# Skip registration if action is in exclude_actions
 			if func.__name__ in self.exclude_actions:
 				return func
@@ -380,7 +379,6 @@ class Registry(Generic[Context]):
 					raise RuntimeError(
 						f'Action {action_name}() failed: {type(e).__name__}: {e} (page may have closed or navigated away mid-action)'
 					) from retry_error
-				raise
 
 		except ValueError as e:
 			# Preserve ValueError messages from validation
@@ -469,7 +467,7 @@ class Registry(Generic[Context]):
 		if all_missing_placeholders:
 			logger.warning(f'Missing or empty keys in sensitive_data dictionary: {", ".join(all_missing_placeholders)}')
 
-		return type(params).model_validate(processed_params)
+		return type(params).model_validate(processed_params)  # type: ignore
 
 	# @time_execution_sync('--create_action_model')
 	def create_action_model(self, include_actions: list[str] | None = None, page=None) -> type[ActionModel]:
