@@ -81,7 +81,10 @@ class GoogleMessageSerializer:
 						url = part.image_url.url
 
 						# Format: data:image/png;base64,<data>
-						header, data = url.split(',', 1)
+						split_url = url.split(',', 1)
+						if len(split_url) != 2:
+							raise ValueError(f"Invalid image URL format: {url}")
+						header, data = split_url
 						# Decode base64 to bytes
 						image_bytes = base64.b64decode(data)
 

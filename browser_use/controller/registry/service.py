@@ -523,7 +523,7 @@ class Registry(Generic[Context]):
 
 		# If no actions available, return empty ActionModel
 		if not individual_action_models:
-			return create_model('EmptyActionModel', __base__=ActionModel)
+			return create_model('EmptyActionModel', __base__=ActionModel)  # type: ignore
 
 		# Create proper Union type that maintains ActionModel interface
 		if len(individual_action_models) == 1:
@@ -539,18 +539,18 @@ class Registry(Generic[Context]):
 				def get_index(self) -> int | None:
 					"""Delegate get_index to the underlying action model"""
 					if hasattr(self.root, 'get_index'):
-						return self.root.get_index()
+						return self.root.get_index()  # type: ignore
 					return None
 
 				def set_index(self, index: int):
 					"""Delegate set_index to the underlying action model"""
 					if hasattr(self.root, 'set_index'):
-						self.root.set_index(index)
+						self.root.set_index(index)  # type: ignore
 
 				def model_dump(self, **kwargs):
 					"""Delegate model_dump to the underlying action model"""
 					if hasattr(self.root, 'model_dump'):
-						return self.root.model_dump(**kwargs)
+						return self.root.model_dump(**kwargs)  # type: ignore
 					return super().model_dump(**kwargs)
 
 			# Set the name for better debugging
