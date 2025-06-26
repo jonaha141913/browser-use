@@ -335,7 +335,7 @@ async def comprehensive_judge(
 	# Encode images
 	encoded_images: list[ContentPartImageParam] = []
 	for img_path in selected_images:
-		if Path(img_path).exists():
+		if isinstance(img_path, str) and Path(img_path).exists():
 			encoded_img = encode_image(img_path)
 			if encoded_img:
 				encoded_images.append(ContentPartImageParam(image_url=ImageURL(url=f'data:image/jpeg;base64,{encoded_img}')))

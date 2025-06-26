@@ -43,7 +43,7 @@ class ChatAnthropic(BaseChatModel):
 	api_key: str | None = None
 	auth_token: str | None = None
 	base_url: str | httpx.URL | None = None
-	timeout: float | Timeout | None | NotGiven = NotGiven()
+	timeout: float | Timeout | None = None
 	max_retries: int = 2
 	default_headers: Mapping[str, str] | None = None
 	default_query: Mapping[str, object] | None = None
@@ -116,10 +116,11 @@ class ChatAnthropic(BaseChatModel):
 		return usage
 
 	@overload
-	async def ainvoke(self, messages: list[BaseMessage], output_format: None = None) -> ChatInvokeCompletion[str]: ...
+	@overload
+	async def ainvoke(self, messages: list[BaseMessage], output_format: None = ...) -> ChatInvokeCompletion[str]: ...
 
 	@overload
-	async def ainvoke(self, messages: list[BaseMessage], output_format: type[T]) -> ChatInvokeCompletion[T]: ...
+	async def ainvoke(self, messages: list[BaseMessage], output_format: type[T], ...) -> ChatInvokeCompletion[T]: ...
 
 	async def ainvoke(
 		self, messages: list[BaseMessage], output_format: type[T] | None = None
@@ -132,7 +133,7 @@ class ChatAnthropic(BaseChatModel):
 				response = await self.get_client().messages.create(
 					model=self.model,
 					messages=anthropic_messages,
-					system=system_prompt or NOT_GIVEN,
+					system=system_prompt if system_prompt else NOT_GIVEN,
 					**self._get_client_params_for_invoke(),
 				)
 
@@ -175,7 +176,7 @@ class ChatAnthropic(BaseChatModel):
 					model=self.model,
 					messages=anthropic_messages,
 					tools=[tool],
-					system=system_prompt or NOT_GIVEN,
+					system=system_prompt if system_prompt else NOT_GIVEN,
 					tool_choice=tool_choice,
 					**self._get_client_params_for_invoke(),
 				)

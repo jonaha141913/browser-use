@@ -428,10 +428,9 @@ class TestFileSystem:
 		file_obj = fs2.get_file('custom.txt')
 		assert file_obj is not None
 		assert file_obj.content == 'Custom content'
-		assert (
-			fs2.get_file('extracted_content_0.md').content is not None
-			and fs2.get_file('extracted_content_0.md').content == 'Extracted data'
-		)
+		extracted_file = fs2.get_file('extracted_content_0.md')
+		assert extracted_file is not None
+		assert extracted_file.content == 'Extracted data'
 
 		# Verify files exist on disk
 		assert (fs2.data_dir / 'results.md').exists()
@@ -574,6 +573,7 @@ class TestFileSystemIntegration:
 			file_obj = fs.get_file('results.md')
 			assert file_obj is not None
 			results_content = file_obj.content
+			assert results_content is not None
 			assert '# Test Results' in results_content
 			assert '## Section 1' in results_content
 			assert '## Section 2' in results_content
@@ -590,14 +590,19 @@ class TestFileSystemIntegration:
 			assert len(fs2.files) == 5
 			file_obj = fs2.get_file('results.md')
 			assert file_obj is not None
+			assert file_obj.content is not None
 			assert file_obj.content == results_content
 			file_obj = fs2.get_file('notes.txt')
 			assert file_obj is not None
+			assert file_obj.content is not None
 			assert file_obj.content == 'Important notes:\n- Note 1\n- Note 2'
 			assert fs2.extracted_content_count == 2
 
 			# Verify files exist on disk
 			for filename in files:
+				file_obj = fs2.get_file(filename)
+				assert file_obj is not None
+				assert file_obj.content is not None
 				assert (fs2.data_dir / filename).exists()
 
 			fs2.nuke()
