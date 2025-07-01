@@ -127,6 +127,10 @@ class ChatAnthropic(BaseChatModel):
 	) -> ChatInvokeCompletion[T] | ChatInvokeCompletion[str]:
 		anthropic_messages, system_prompt = AnthropicMessageSerializer.serialize_messages(messages)
 
+		# Format system prompt as a list of text blocks if it's a string
+		if isinstance(system_prompt, str):
+			system_prompt = [{'type': 'text', 'text': system_prompt}]
+
 		try:
 			if output_format is None:
 				# Normal completion without structured output
