@@ -186,7 +186,7 @@ class BrowserUseServer:
 	def _setup_handlers(self):
 		"""Setup MCP server handlers."""
 
-		@self.server.list_tools()
+		@self.server.list_tools
 		async def handle_list_tools() -> list[types.Tool]:
 			"""List all available browser-use tools."""
 			return [
