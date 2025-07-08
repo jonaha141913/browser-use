@@ -161,7 +161,11 @@ class ChatAnthropicBedrock(ChatAWSBedrock):
 					model=self.model,
 					messages=anthropic_messages,
 					system=system_prompt or NOT_GIVEN,
-					**self._get_client_params_for_invoke(),
+					max_tokens=self.max_tokens,
+					temperature=self.temperature,
+					top_p=self.top_p,
+					top_k=self.top_k,
+					stop_sequences=self.stop_sequences,
 				)
 
 				usage = self._get_usage(response)
@@ -205,7 +209,11 @@ class ChatAnthropicBedrock(ChatAWSBedrock):
 					tools=[tool],
 					system=system_prompt or NOT_GIVEN,
 					tool_choice=tool_choice,
-					**self._get_client_params_for_invoke(),
+					max_tokens=self.max_tokens,
+					temperature=self.temperature,
+					top_p=self.top_p,
+					top_k=self.top_k,
+					stop_sequences=self.stop_sequences,
 				)
 
 				usage = self._get_usage(response)
