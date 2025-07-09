@@ -186,16 +186,15 @@ class BrowserUseServer:
 	def _setup_handlers(self):
 		"""Setup MCP server handlers."""
 
-		@self.server.list_tools()
-		async def handle_list_tools() -> list[types.Tool]:
+		async def handle_list_tools(ctx: Any, params: types.PaginatedRequestParams | None) -> types.ListToolsResult:
 			"""List all available browser-use tools."""
-			return [
+			tools = [
 				# Agent tools
 				# Direct browser control tools
 				types.Tool(
 					name='browser_navigate',
 					description='Navigate to a URL in the browser',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'url': {'type': 'string', 'description': 'The URL to navigate to'},
@@ -207,7 +206,7 @@ class BrowserUseServer:
 				types.Tool(
 					name='browser_click',
 					description='Click an element on the page by its index',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'index': {
@@ -226,7 +225,7 @@ class BrowserUseServer:
 				types.Tool(
 					name='browser_type',
 					description='Type text into an input field',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'index': {
@@ -241,7 +240,7 @@ class BrowserUseServer:
 				types.Tool(
 					name='browser_get_state',
 					description='Get the current state of the page including all interactive elements',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'include_screenshot': {
@@ -255,7 +254,7 @@ class BrowserUseServer:
 				types.Tool(
 					name='browser_extract_content',
 					description='Extract structured content from the current page based on a query',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'query': {'type': 'string', 'description': 'What information to extract from the page'},
@@ -271,7 +270,7 @@ class BrowserUseServer:
 				types.Tool(
 					name='browser_scroll',
 					description='Scroll the page',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'direction': {
@@ -286,16 +285,16 @@ class BrowserUseServer:
 				types.Tool(
 					name='browser_go_back',
 					description='Go back to the previous page',
-					inputSchema={'type': 'object', 'properties': {}},
+					input_schema={'type': 'object', 'properties': {}},
 				),
 				# Tab management
 				types.Tool(
-					name='browser_list_tabs', description='List all open tabs', inputSchema={'type': 'object', 'properties': {}}
+					name='browser_list_tabs', description='List all open tabs', input_schema={'type': 'object', 'properties': {}}
 				),
 				types.Tool(
 					name='browser_switch_tab',
 					description='Switch to a different tab',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {'tab_index': {'type': 'integer', 'description': 'Index of the tab to switch to'}},
 						'required': ['tab_index'],
@@ -304,7 +303,7 @@ class BrowserUseServer:
 				types.Tool(
 					name='browser_close_tab',
 					description='Close a tab',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {'tab_index': {'type': 'integer', 'description': 'Index of the tab to close'}},
 						'required': ['tab_index'],
@@ -313,7 +312,7 @@ class BrowserUseServer:
 				# types.Tool(
 				# 	name="browser_close",
 				# 	description="Close the browser session",
-				# 	inputSchema={
+				# 	input_schema={
 				# 		"type": "object",
 				# 		"properties": {}
 				# 	}
@@ -321,7 +320,7 @@ class BrowserUseServer:
 				types.Tool(
 					name='retry_with_browser_use_agent',
 					description='Retry a task using the browser-use agent. Only use this as a last resort if you fail to interact with a page multiple times.',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'task': {
@@ -354,19 +353,21 @@ class BrowserUseServer:
 					},
 				),
 			]
+			return types.ListToolsResult(tools=tools)
 
-		@self.server.call_tool()
-		async def handle_call_tool(name: str, arguments: dict[str, Any] | None) -> list[types.TextContent]:
+		async def handle_call_tool(ctx: Any, params: types.CallToolRequestParams) -> types.CallToolResult:
 			"""Handle tool execution."""
+			name = params.name
+			arguments = params.arguments
 			start_time = time.time()
 			error_msg = None
 			try:
 				result = await self._execute_tool(name, arguments or {})
-				return [types.TextContent(type='text', text=result)]
+				return types.CallToolResult(content=[types.TextContent(type='text', text=result)])
 			except Exception as e:
 				error_msg = str(e)
 				logger.error(f'Tool execution failed: {e}', exc_info=True)
-				return [types.TextContent(type='text', text=f'Error: {str(e)}')]
+				return types.CallToolResult(content=[types.TextContent(type='text', text=f'Error: {str(e)}')])
 			finally:
 				# Capture telemetry for tool calls
 				duration = time.time() - start_time
@@ -379,6 +380,9 @@ class BrowserUseServer:
 						error_message=error_msg,
 					)
 				)
+
+		# The installed mcp low-level Server registers handlers through constructor arguments
+		self.server = Server(self.server.name, on_list_tools=handle_list_tools, on_call_tool=handle_call_tool)
 
 	async def _execute_tool(self, tool_name: str, arguments: dict[str, Any]) -> str:
 		"""Execute a browser-use tool."""
