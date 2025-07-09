@@ -122,6 +122,9 @@ class ChatAnthropic(BaseChatModel):
 	@overload
 	async def ainvoke(self, messages: list[BaseMessage], output_format: type[T]) -> ChatInvokeCompletion[T]: ...
 
+	@overload
+	async def ainvoke(self, messages: list[BaseMessage], output_format: type[T] | None = None) -> ChatInvokeCompletion[T] | ChatInvokeCompletion[str]: ...
+
 	async def ainvoke(
 		self, messages: list[BaseMessage], output_format: type[T] | None = None
 	) -> ChatInvokeCompletion[T] | ChatInvokeCompletion[str]:
@@ -133,7 +136,7 @@ class ChatAnthropic(BaseChatModel):
 				response = await self.get_client().messages.create(
 					model=self.model,
 					messages=anthropic_messages,
-					system=system_prompt or NOT_GIVEN,
+					system=system_prompt if system_prompt is not None else NOT_GIVEN,
 					**self._get_client_params_for_invoke(),
 				)
 
@@ -176,7 +179,7 @@ class ChatAnthropic(BaseChatModel):
 					model=self.model,
 					messages=anthropic_messages,
 					tools=[tool],
-					system=system_prompt or NOT_GIVEN,
+					system=system_prompt if system_prompt is not None else NOT_GIVEN,
 					tool_choice=tool_choice,
 					**self._get_client_params_for_invoke(),
 				)

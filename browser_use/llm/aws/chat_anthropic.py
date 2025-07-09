@@ -7,7 +7,7 @@ from anthropic import (
 	NOT_GIVEN,
 	APIConnectionError,
 	APIStatusError,
-	AsyncAnthropicBedrock,
+	AsyncAnthropic,
 	RateLimitError,
 )
 from anthropic.types import CacheControlEphemeralParam, Message, ToolParam
