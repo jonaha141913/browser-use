@@ -18,90 +18,90 @@ from browser_use.mcp.client import MCPClient
 
 
 class MockMCPServer:
-	"""A minimal MCP server for testing."""
+    """A minimal MCP server for testing."""
 
-	def __init__(self):
-		self.server = Server('test-mcp-server')
-		self.call_history = []  # Track all tool calls
-		self._setup_handlers()
+    def __init__(self):
+        self.server = Server('test-mcp-server')
+        self.call_history = []  # Track all tool calls
+        self._setup_handlers()
 
-	def _setup_handlers(self):
-		"""Setup MCP server handlers."""
+    def _setup_handlers(self):
+        """Setup MCP server handlers."""
 
-		@self.server.list_tools()
-		async def handle_list_tools() -> list[types.Tool]:
-			"""List available test tools."""
-			return [
-				types.Tool(
-					name='count_to_n',
-					description='Count from 1 to n and return the numbers',
-					inputSchema={
-						'type': 'object',
-						'properties': {'n': {'type': 'integer', 'description': 'Number to count to'}},
-						'required': ['n'],
-					},
-				),
-				types.Tool(
-					name='echo_message',
-					description='Echo back a message with a prefix',
-					inputSchema={
-						'type': 'object',
-						'properties': {
-							'message': {'type': 'string', 'description': 'Message to echo'},
-							'prefix': {'type': 'string', 'description': 'Prefix to add', 'default': 'Echo:'},
-						},
-						'required': ['message'],
-					},
-				),
-				types.Tool(
-					name='get_test_data',
-					description='Get some test data as JSON',
-					inputSchema={'type': 'object', 'properties': {}},
-				),
-			]
+        @self.server.list_tools()
+        async def handle_list_tools() -> list[types.Tool]:
+            """List available test tools."""
+            return [
+                types.Tool(
+                    name='count_to_n',
+                    description='Count from 1 to n and return the numbers',
+                    inputSchema={
+                        'type': 'object',
+                        'properties': {'n': {'type': 'integer', 'description': 'Number to count to'}},
+                        'required': ['n'],
+                    },
+                ),
+                types.Tool(
+                    name='echo_message',
+                    description='Echo back a message with a prefix',
+                    inputSchema={
+                        'type': 'object',
+                        'properties': {
+                            'message': {'type': 'string', 'description': 'Message to echo'},
+                            'prefix': {'type': 'string', 'description': 'Prefix to add', 'default': 'Echo:'},
+                        },
+                        'required': ['message'],
+                    },
+                ),
+                types.Tool(
+                    name='get_test_data',
+                    description='Get some test data as JSON',
+                    inputSchema={'type': 'object', 'properties': {}},
+                ),
+            ]
 
-		@self.server.call_tool()
-		async def handle_call_tool(name: str, arguments: dict | None) -> list[types.TextContent]:
-			"""Handle tool execution."""
-			# Record the call
-			self.call_history.append({'tool': name, 'arguments': arguments or {}})
+        @self.server.call_tool()
+        async def handle_call_tool(name: str, arguments: dict | None) -> list[types.TextContent]:
+            """Handle tool execution."""
+            # Record the call
+            self.call_history.append({'tool': name, 'arguments': arguments or {}})
 
-			if name == 'count_to_n':
-				assert arguments is not None
-				n = arguments.get('n', 5)
-				numbers = ', '.join(str(i) for i in range(1, n + 1))
-				result = f'Counted to {n}: {numbers}'
+            if name == 'count_to_n':
+                assert arguments is not None
+                n = arguments.get('n', 5)
+                numbers = ', '.join(str(i) for i in range(1, n + 1))
+                result = f'Counted to {n}: {numbers}'
 
-			elif name == 'echo_message':
-				assert arguments is not None
-				message = arguments.get('message', '')
-				prefix = arguments.get('prefix', 'Echo:')
-				result = f'{prefix} {message}'
+            elif name == 'echo_message':
+                assert arguments is not None
+                message = arguments.get('message', '')
+                prefix = arguments.get('prefix', 'Echo:')
+                result = f'{prefix} {message}'
 
-			elif name == 'get_test_data':
-				data = {'status': 'success', 'items': ['apple', 'banana', 'cherry'], 'count': 3}
-				result = json.dumps(data, indent=2)
+            elif name == 'get_test_data':
+                data = {'status': 'success', 'items': ['apple', 'banana', 'cherry'], 'count': 3}
+                result = json.dumps(data, indent=2)
 
-			else:
-				result = f'Unknown tool: {name}'
+            else:
+                result = f'Unknown tool: {name}'
 
-			return [types.TextContent(type='text', text=result)]
+            return [types.TextContent(type='text', text=result)]
 
-	async def run(self):
-		"""Run the MCP server."""
-		async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-			await self.server.run(
-				read_stream,
-				write_stream,
-				InitializationOptions(
-					server_name='test-mcp-server',
-					server_version='0.1.0',
-					capabilities=self.server.get_capabilities(
-						notification_options=NotificationOptions(),
-						experimental_capabilities={},
-					),
-				),
-			)
+    async def run(self):
+        """Run the MCP server."""
+        async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
+            await self.server.run(
+                read_stream,
+                write_stream,
+                InitializationOptions(
+                    server_name='test-mcp-server',
+                    server_version='0.1.0',
+                    capabilities=self.server.get_capabilities(
+                        notification_options=NotificationOptions(),
+                        experimental_capabilities={},
+                    ),
+                ),
+            )
 
 
 # Create test server script that will run in subprocess
@@ -135,124 +135,125 @@ async def test_mcp_server_script():
 
 
 async def test_mcp_client_basic_connection(test_mcp_server_script):
-	"""Test basic MCP client connection and tool discovery."""
-	controller = Controller()
+    """Test basic MCP client connection and tool discovery."""
+    controller = Controller()
 
-	mcp_client = MCPClient(server_name='test-server', command=sys.executable, args=[test_mcp_server_script])
+    mcp_client = MCPClient(server_name='test-server', command=sys.executable, args=[test_mcp_server_script])
 
-	try:
-		# Connect to server
-		await mcp_client.connect()
+    try:
+        # Connect to server
+        await mcp_client.connect()
 
-		# Verify tools were discovered
-		assert len(mcp_client._tools) == 3
-		assert 'count_to_n' in mcp_client._tools
-		assert 'echo_message' in mcp_client._tools
-		assert 'get_test_data' in mcp_client._tools
+        # Verify tools were discovered
+        assert len(mcp_client._tools) == 3
+        assert 'count_to_n' in mcp_client._tools
+        assert 'echo_message' in mcp_client._tools
+        assert 'get_test_data' in mcp_client._tools
 
-		# Register tools to controller
-		await mcp_client.register_to_controller(controller)
+        # Register tools to controller
+        await mcp_client.register_to_controller(controller)
 
-		# Verify tools are registered as actions
-		actions = controller.registry.registry.actions
-		assert 'count_to_n' in actions
-		assert 'echo_message' in actions
-		assert 'get_test_data' in actions
+        # Verify tools are registered as actions
+        actions = controller.registry.registry.actions
+        assert 'count_to_n' in actions
+        assert 'echo_message' in actions
+        assert 'get_test_data' in actions
 
-		# Test executing a tool
-		echo_action = actions['echo_message']
-		# Need to create param model instance
-		params = echo_action.param_model(message='Hello MCP', prefix='Test:')
-		result = await echo_action.function(params=params)
+        # Test executing a tool
+        echo_action = actions['echo_message']
+        # Need to create param model instance
+        params = echo_action.param_model(message='Hello MCP', prefix='Test:')
+        result = await echo_action.function(params=params)
 
-		assert result.extracted_content == 'Test: Hello MCP'
-		assert 'echo_message' in result.long_term_memory
-		assert 'test-server' in result.long_term_memory
+        assert result.extracted_content == 'Test: Hello MCP'
+        assert 'echo_message' in result.long_term_memory
+        assert 'test-server' in result.long_term_memory
 
-	finally:
-		await mcp_client.disconnect()
+    finally:
+        await mcp_client.disconnect()
 
 
 async def test_mcp_tools_with_agent(test_mcp_server_script, httpserver: HTTPServer):
-	"""Test that agent can discover and use MCP tools."""
-	# Set up test webpage
-	httpserver.expect_request('/').respond_with_data(
-		"""
-		<html>
-		<body>
-			<h1>Test Page</h1>
-			<p>Count to 5 and echo a message</p>
-		</body>
-		</html>
-		""",
-		content_type='text/html',
-	)
+    """Test that agent can discover and use MCP tools."""
+    # Set up test webpage
+    httpserver.expect_request('/').respond_with_data(
+        """
+        <html>
+        <body>
+            <h1>Test Page</h1>
+            <p>Count to 5 and echo a message</p>
+        </body>
+        </html>
+        """,
+        content_type='text/html',
+    )
 
-	browser_session = BrowserSession(browser_profile=BrowserProfile(headless=True, user_data_dir=None))
-	await browser_session.start()
-	controller = Controller()
+    browser_session = BrowserSession(browser_profile=BrowserProfile(headless=True, user_data_dir=None))
+    await browser_session.start()
+    controller = Controller()
 
-	# Connect MCP client
-	mcp_client = MCPClient(server_name='test-server', command=sys.executable, args=[test_mcp_server_script])
+    # Connect MCP client
+    mcp_client = MCPClient(server_name='test-server', command=sys.executable, args=[test_mcp_server_script])
 
-	try:
-		await mcp_client.connect()
-		await mcp_client.register_to_controller(controller)
+    try:
+        await mcp_client.connect()
+        await mcp_client.register_to_controller(controller)
 
-		# Import create_mock_llm from conftest
-		from tests.ci.conftest import create_mock_llm
+        # Import create_mock_llm from conftest
+        from tests.ci.conftest import create_mock_llm
 
-		# Create mock LLM with specific actions
-		actions = [
-			f'{{"thinking": null, "evaluation_previous_goal": "Starting", "memory": "Starting task", "next_goal": "Navigate to test page", "action": [{{"go_to_url": {{"url": "{httpserver.url_for("/")}"}}}}]}}',
-			'{"thinking": null, "evaluation_previous_goal": "Navigated", "memory": "On test page", "next_goal": "Count to 3", "action": [{"count_to_n": {"n": 3}}]}',
-			'{"thinking": null, "evaluation_previous_goal": "Counted", "memory": "Counted to 3", "next_goal": "Echo message", "action": [{"echo_message": {"message": "MCP works!"}}]}',
-			'{"thinking": null, "evaluation_previous_goal": "Echoed", "memory": "Message echoed", "next_goal": "Complete", "action": [{"done": {"text": "Completed MCP test", "success": true}}]}',
-		]
-		mock_llm = create_mock_llm(actions=actions)
+        # Create mock LLM with specific actions
+        actions = [
+            f'{{"thinking": null, "evaluation_previous_goal": "Starting", "memory": "Starting task", "next_goal": "Navigate to test page", "action": [{{"go_to_url": {{"url": "{httpserver.url_for("/")}"}}}}]}}',
+            '{"thinking": null, "evaluation_previous_goal": "Navigated", "memory": "On test page", "next_goal": "Count to 3", "action": [{"count_to_n": {"n": 3}}]}',
+            '{"thinking": null, "evaluation_previous_goal": "Counted", "memory": "Counted to 3", "next_goal": "Echo message", "action": [{"echo_message": {"message": "MCP works!"}}]}',
+            '{"thinking": null, "evaluation_previous_goal": "Echoed", "memory": "Message echoed", "next_goal": "Complete", "action": [{"done": {"text": "Completed MCP test", "success": true}}]}',
+        ]
+        mock_llm = create_mock_llm(actions=actions)
 
-		# Create agent
-		agent = Agent(
-			task=f"Go to {httpserver.url_for('/')} then use count_to_n to count to 3, and echo_message to say 'MCP works!'",
-			llm=mock_llm,
-			browser_session=browser_session,
-			controller=controller,
-		)
+        # Create agent
+        agent = Agent(
+            task=f"Go to {httpserver.url_for('/')} then use count_to_n to count to 3, and echo_message to say 'MCP works!'",
+            llm=mock_llm,
+            browser_session=browser_session,
+            controller=controller,
+        )
 
-		# Run agent
-		history = await agent.run(max_steps=10)
+        # Run agent
+        history = await agent.run(max_steps=10)
 
-		# Verify the agent used MCP tools
-		action_names = []
-		for step in history.history:
-			if step.model_output and step.model_output.action:
-				for action in step.model_output.action:
-					action_dict = action.model_dump(exclude_unset=True)
-					action_names.extend(action_dict.keys())
+        # Verify the agent used MCP tools
+        action_names = []
+        for step in history.history:
+            if step.model_output and step.model_output.action:
+                for action in step.model_output.action:
+                    action_dict = action.model_dump(exclude_unset=True)
+                    action_names.extend(action_dict.keys())
 
-		assert 'count_to_n' in action_names
-		assert 'echo_message' in action_names
+        assert 'count_to_n' in action_names
+        assert 'echo_message' in action_names
 
-		# Check results
-		results = []
-		for step in history.history:
-			if step.result:
-				for r in step.result:
-					if r.extracted_content:
-						results.append(r.extracted_content)
+        # Check results
+        results = []
+        for step in history.history:
+            if step.result:
+                for r in step.result:
+                    if r.extracted_content:
+                        results.append(r.extracted_content)
 
-		# Verify MCP tool outputs
-		assert any('Counted to 3: 1, 2, 3' in r for r in results)
-		assert any('Echo: MCP works!' in r for r in results)
+        # Verify MCP tool outputs
+        assert any('Counted to 3: 1, 2, 3' in r for r in results)
+        assert any('Echo: MCP works!' in r for r in results)
 
-	finally:
-		await mcp_client.disconnect()
-		await browser_session.stop()
+    finally:
+        await mcp_client.disconnect()
+        await browser_session.stop()
 
 
 async def test_mcp_tool_parameter_validation(test_mcp_server_script):
-	"""Test that MCP tool parameters are properly validated."""
-	controller = Controller()
+    """Test that MCP tool parameters are properly validated."""
+    controller = Controller()
+
 
 	mcp_client = MCPClient(server_name='test-server', command=sys.executable, args=[test_mcp_server_script])
 

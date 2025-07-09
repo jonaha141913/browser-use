@@ -108,13 +108,13 @@ def encode_image(image_path: str) -> str:
 
 
 def truncate_text(text: str, max_length: int, from_beginning: bool = False) -> str:
-	"""Truncate text to maximum length with eval system indicator."""
-	if len(text) <= max_length:
-		return text
-	if from_beginning:
-		return '...[cut for eval]' + text[-max_length + 23 :]
-	else:
-		return text[: max_length - 23] + '...[cut for eval]...'
+    """Truncate text to maximum length with eval system indicator."""
+    if len(text) <= max_length:
+        return text
+    if from_beginning:
+        return '...[cut for eval]' + text[-max_length + 23 :]
+    else:
+        return text[: max_length - 23] + '...[cut for eval]...'
 
 
 @observe_debug()
@@ -199,7 +199,7 @@ def are_images_identical(img_path1: str, img_path2: str) -> bool:
 				return False
 
 			# Compare pixel data
-			return list(img1.getdata()) == list(img2.getdata())
+			return list(img1.tobytes()) == list(img2.tobytes())
 	except Exception as e:
 		logger.warning(f'Failed to compare images {img_path1} and {img_path2}: {e}')
 		return False

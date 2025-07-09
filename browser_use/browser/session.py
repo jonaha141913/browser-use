@@ -23,12 +23,13 @@ from browser_use.utils import _log_pretty_path, _log_pretty_url
 
 from .utils import normalize_url
 
-os.environ['PW_TEST_SCREENSHOT_NO_FONTS_READY'] = '1'  # https://github.com/microsoft/playwright/issues/35972
-
+import os
 import psutil
 from bubus.helpers import retry
 from playwright._impl._api_structures import ViewportSize
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, InstanceOf, PrivateAttr, model_validator
+
+os.environ['PW_TEST_SCREENSHOT_NO_FONTS_READY'] = '1'  # https://github.com/microsoft/playwright/issues/35972
 from uuid_extensions import uuid7str
 
 from browser_use.browser.profile import BROWSERUSE_DEFAULT_CHANNEL, BrowserChannel, BrowserProfile
@@ -508,7 +509,9 @@ class BrowserSession(BaseModel):
 		owns_browser = getattr(self, '_owns_browser_resources', True)
 		status = f'🪓 killing pid={self.browser_pid}...' if (self.browser_pid and owns_browser) else '☠️'
 		self.logger.debug(
-			f'🗑️ Garbage collected BrowserSession 🆂 {self.id[-4:]}.{str(id(self.agent_current_page))[-2:]} ref #{str(id(self))[-4:]} keep_alive={keep_alive} owns_browser={owns_browser} {status}'
+			f'🗑️ Garbage collected BrowserSession 🆂 {self.id[-4:]}.'
+			f'{str(id(self.agent_current_page))[-2:]} ref #{str(id(self))[-4:]}'
+			f' keep_alive={keep_alive} owns_browser={owns_browser} {status}'
 		)
 		# Only kill browser processes if this instance owns them
 		if owns_browser:
@@ -1006,7 +1009,7 @@ class BrowserSession(BaseModel):
 			self.cdp_url,
 			**self.browser_profile.kwargs_for_connect().model_dump(),
 		)
-		self._set_browser_keep_alive(True)  # we connected to an existing browser, dont kill it at the end
+		self._set_browser_keep_alive(True)  # we connected to an existing browser, don't kill it at the end
 
 	async def setup_browser_via_wss_url(self) -> None:
 		"""check for a passed wss_url, connect to a remote playwright browser server via WSS"""
@@ -1100,9 +1103,7 @@ class BrowserSession(BaseModel):
 			if not self.browser_profile.user_data_dir:
 				# self.logger.debug('🌎 Launching local browser in incognito mode')
 				# if no user_data_dir is provided, generate a unique one for this temporary browser_context (will be used to uniquely identify the browser_pid later)
-				self.browser_profile.user_data_dir = self.browser_profile.user_data_dir or Path(
-					tempfile.mkdtemp(prefix='browseruse-tmp-')
-				)
+				self.browser_profile.user_data_dir = Path(tempfile.mkdtemp(prefix='browseruse-tmp-'))
 
 			# user data dir was provided, prepare it for use (handles conflicts automatically)
 			self.prepare_user_data_dir()
@@ -2144,7 +2145,7 @@ class BrowserSession(BaseModel):
 				# page.title() can hang forever on tabs that are crashed/disappeared/about:blank
 				# but we should preserve the real URL and not mislead the LLM about tab availability
 				self.logger.debug(f'⚠️ Failed to get tab info for tab #{page_id}: {_log_pretty_url(page.url)} (using fallback title)')
-				
+
 				# Only mark as unusable if it's actually about:blank, otherwise preserve the real URL
 				if page.url == 'about:blank':
 					tab_info = TabInfo(page_id=page_id, url='about:blank', title='ignore this tab and do not use it')
@@ -2503,6 +2504,7 @@ class BrowserSession(BaseModel):
 			'metrics',
 			# Ad-related
 			'doubleclick',
+
 			'adsystem',
 			'adserver',
 			'advertising',

@@ -252,26 +252,33 @@ class DBStyleConfigJSON(BaseModel):
 
 
 def create_default_config() -> DBStyleConfigJSON:
-	"""Create a fresh default configuration."""
-	logger.info('Creating fresh default config.json')
+    """Create a fresh default configuration."""
+    logger.info('Creating fresh default config.json')
 
-	new_config = DBStyleConfigJSON()
+    new_config = DBStyleConfigJSON()
 
-	# Generate default IDs
-	profile_id = str(uuid4())
-	llm_id = str(uuid4())
-	agent_id = str(uuid4())
+    # Generate default IDs
+    profile_id = str(uuid4())
+    llm_id = str(uuid4())
+    agent_id = str(uuid4())
 
-	# Create default browser profile entry
-	new_config.browser_profile[profile_id] = BrowserProfileEntry(id=profile_id, default=True, headless=False, user_data_dir=None)
+    # Create default browser profile entry
+    new_config.browser_profile[profile_id] = BrowserProfileEntry(
+        id=profile_id, default=True, headless=False, user_data_dir=None
+    )
 
-	# Create default LLM entry
-	new_config.llm[llm_id] = LLMEntry(id=llm_id, default=True, model='gpt-4o', api_key='your-openai-api-key-here')
+    # Create default LLM entry
+    new_config.llm[llm_id] = LLMEntry(
+        id=llm_id,
+        default=True,
+        model='gpt-4o',
+        api_key='your-openai-api-key-here',
+    )
 
-	# Create default agent entry
-	new_config.agent[agent_id] = AgentEntry(id=agent_id, default=True)
+    # Create default agent entry
+    new_config.agent[agent_id] = AgentEntry(id=agent_id, default=True)
 
-	return new_config
+    return new_config
 
 
 def load_and_migrate_config(config_path: Path) -> DBStyleConfigJSON:
