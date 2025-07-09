@@ -144,6 +144,7 @@ class ChatAnthropicBedrock(ChatAWSBedrock):
 		return usage
 
 	@overload
+	@overload
 	async def ainvoke(self, messages: list[BaseMessage], output_format: None = None) -> ChatInvokeCompletion[str]: ...
 
 	@overload

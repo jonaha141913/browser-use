@@ -89,6 +89,11 @@ class GoogleMessageSerializer:
 						image_part = Part.from_bytes(data=image_bytes, mime_type='image/png')
 
 						message_parts.append(image_part)
+					elif part.type == 'image':
+						# Handle direct image bytes if available
+						if hasattr(part, 'image') and part.image:
+							image_part = Part.from_bytes(data=part.image, mime_type='image/png')
+							message_parts.append(image_part)
 
 			# Create the Content object
 			if message_parts:
