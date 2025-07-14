@@ -46,11 +46,14 @@ class ChatDeepSeek(BaseChatModel):
 		return 'deepseek'
 
 	def _client(self) -> AsyncOpenAI:
+		# Pass timeout through untyped kwargs: an httpx.Timeout from this package's httpx
+		# is not assignable to the client's own httpx Timeout type.
+		client_kwargs = dict(self.client_params or {})
+		client_kwargs.setdefault('timeout', self.timeout)
 		return AsyncOpenAI(
 			api_key=self.api_key,
-			base_url=self.base_url,
-			timeout=self.timeout,
-			**(self.client_params or {}),
+			base_url=str(self.base_url) if self.base_url is not None else None,
+			**client_kwargs,
 		)
 
 	@property
