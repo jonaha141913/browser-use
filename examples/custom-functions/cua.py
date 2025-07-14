@@ -131,8 +131,8 @@ async def openai_cua_fallback(params: OpenAICUAAction, browser_session: BrowserS
 
 	try:
 		page = await browser_session.get_current_page()
-		page_info = browser_session.browser_state_summary.page_info
-		if not page_info:
+		page_info = browser_session.browser_state_summary.page_info or None
+		if page_info is None:
 			raise Exception('Page info not found - cannot execute CUA action')
 
 		print(f'📐 Viewport size: {page_info.viewport_width}x{page_info.viewport_height}')
