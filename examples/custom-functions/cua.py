@@ -200,6 +200,8 @@ async def openai_cua_fallback(params: OpenAICUAAction, browser_session: BrowserS
 
 		action = computer_call.action
 		print(f'🎬 Executing CUA action: {action.type} - {action}')
+		if action.type == 'computer_call':
+			action = computer_call.action
 
 		action_result = await handle_model_action(page, action)
 		await asyncio.sleep(0.1)

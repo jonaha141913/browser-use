@@ -48,8 +48,8 @@ class ChatDeepSeek(BaseChatModel):
 	def _client(self) -> AsyncOpenAI:
 		return AsyncOpenAI(
 			api_key=self.api_key,
-			base_url=self.base_url,
-			timeout=self.timeout,
+			base_url=str(self.base_url) if self.base_url else None,
+			timeout=self.timeout if isinstance(self.timeout, httpx.Timeout) else None,
 			**(self.client_params or {}),
 		)
 
