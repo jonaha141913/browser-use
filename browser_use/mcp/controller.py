@@ -102,10 +102,10 @@ class MCPToolWrapper:
 		# Parse tool parameters to create Pydantic model
 		param_fields = {}
 
-		if tool.inputSchema:
+		if tool.input_schema:
 			# MCP tools use JSON Schema for parameters
-			properties = tool.inputSchema.get('properties', {})
-			required = set(tool.inputSchema.get('required', []))
+			properties = tool.input_schema.get('properties', {})
+			required = set(tool.input_schema.get('required', []))
 
 			for param_name, param_schema in properties.items():
 				# Convert JSON Schema type to Python type
@@ -134,7 +134,7 @@ class MCPToolWrapper:
 
 		if is_browser_tool:
 			# Browser tools should only be available when on a web page
-			page_filter = lambda page: not is_new_tab_page(page.url)
+			page_filter = lambda page: not is_new_tab_page(page.url) if hasattr(page, 'url') else False
 
 		# Create wrapper function for the MCP tool
 		async def mcp_action_wrapper(**kwargs):
