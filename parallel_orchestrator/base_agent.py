@@ -24,7 +24,7 @@ class BaseAgent:
 		self.shared_memory = SharedMemory()
 		self.llm = ChatGoogle(model=model, api_key=api_key, temperature=0.3)
 
-	async def initialize(self):
+	async def initialize(self) -> None:
 		"""Initialize the base agent."""
 		logger.info('Initializing dynamic base agent...')
 		self.workers = []
