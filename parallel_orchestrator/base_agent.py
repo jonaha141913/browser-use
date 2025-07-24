@@ -4,8 +4,8 @@ import logging
 import aiofiles
 from browser_use.llm import ChatGoogle
 from browser_use.llm.messages import UserMessage
-from shared_memory import SharedMemory
-from worker_agent import WorkerAgent
+from parallel_orchestrator.shared_memory import SharedMemory
+from parallel_orchestrator.worker_agent import WorkerAgent
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -232,14 +232,14 @@ CLEAN FINAL ANSWER:
 
 	async def process_task(self, main_task: str) -> dict:
 		"""Process any natural language task with dynamic worker allocation."""
-		logger.info(f'Starting to process task: {main_task}')
+		logger.info(f"Starting to process task: {main_task}")
 
 		# Use AI to analyze and split the task
 		subtasks = await self.analyze_and_split_task(main_task)
 
 		# Determine optimal number of workers
 		workers_needed = len(subtasks)
-		logger.info(f'Creating {workers_needed} worker agents for {len(subtasks)} subtasks...')
+		logger.info(f"Creating {workers_needed} worker agents for {len(subtasks)} subtasks...")
 
 		# Create workers dynamically
 		while len(self.workers) < workers_needed:
@@ -254,7 +254,7 @@ CLEAN FINAL ANSWER:
 			await worker.initialize()
 
 		# Start ALL tasks simultaneously for true parallelism
-		logger.info('Starting ALL tasks in parallel...')
+		logger.info("Starting ALL tasks in parallel...")
 		tasks = []
 		for worker, task in zip(self.workers[:workers_needed], subtasks):
 			task_coro = worker.execute_task(task)
@@ -264,9 +264,9 @@ CLEAN FINAL ANSWER:
 		try:
 			await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=600)  # 10 minute timeout
 		except TimeoutError:
-			logger.error('Task execution timed out after 10 minutes')
+			logger.error("Task execution timed out after 10 minutes")
 
-		logger.info('All tasks completed')
+		logger.info("All tasks completed")
 
 		# Get raw results from shared memory
 		raw_results = await self.shared_memory.get_all()
