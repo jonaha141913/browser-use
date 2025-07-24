@@ -1,7 +1,7 @@
+import aiofiles
 import asyncio
 import logging
 
-import aiofiles
 from browser_use.llm import ChatGoogle
 from browser_use.llm.messages import UserMessage
 from shared_memory import SharedMemory
