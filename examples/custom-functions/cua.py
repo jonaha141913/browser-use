@@ -199,12 +199,13 @@ async def openai_cua_fallback(params: OpenAICUAAction, browser_session: BrowserS
 			raise Exception('No computer calls found in CUA response')
 
 		action = computer_call.action
-		print(f'🎬 Executing CUA action: {action.type} - {action}')
-
-		action_result = await handle_model_action(page, action)
-		await asyncio.sleep(0.1)
-
-		print('✅ CUA action completed successfully')
+		if action:
+			print(f'🎬 Executing CUA action: {action.type} - {action}')
+			action_result = await handle_model_action(page, action)
+			await asyncio.sleep(0.1)
+			print('✅ CUA action completed successfully')
+		else:
+			print('⚠️ No action found in computer call')
 		return action_result
 
 	except Exception as e:
