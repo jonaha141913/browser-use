@@ -254,10 +254,10 @@ class MCPClient:
 		# Parse tool parameters to create Pydantic model
 		param_fields = {}
 
-		if tool.inputSchema:
+		if hasattr(tool, 'input_schema') and tool.input_schema:
 			# MCP tools use JSON Schema for parameters
-			properties = tool.inputSchema.get('properties', {})
-			required = set(tool.inputSchema.get('required', []))
+			properties = tool.input_schema.get('properties', {})
+			required = set(tool.input_schema.get('required', []))
 
 			for param_name, param_schema in properties.items():
 				# Convert JSON Schema type to Python type
@@ -421,10 +421,11 @@ class MCPClient:
 		# Handle different MCP result formats
 		if hasattr(result, 'content'):
 			# Structured content response
-			if isinstance(result.content, list):
+			content = result.content
+			if isinstance(content, list):
 				# Multiple content items
 				parts = []
-				for item in result.content:
+				for item in content:
 					if hasattr(item, 'text'):
 						parts.append(item.text)
 					elif hasattr(item, 'type') and item.type == 'text':
@@ -433,7 +434,7 @@ class MCPClient:
 						parts.append(str(item))
 				return '\n'.join(parts)
 			else:
-				return str(result.content)
+				return str(content)
 		elif isinstance(result, list):
 			# List of content items
 			parts = []
