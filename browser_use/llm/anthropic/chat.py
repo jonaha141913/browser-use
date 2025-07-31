@@ -46,7 +46,7 @@ class ChatAnthropic(BaseChatModel):
 	api_key: str | None = None
 	auth_token: str | None = None
 	base_url: str | httpx.URL | None = None
-	timeout: float | Timeout | None | NotGiven = NotGiven()
+	timeout: float | Timeout | None = None
 	max_retries: int = 10
 	default_headers: Mapping[str, str] | None = None
 	default_query: Mapping[str, object] | None = None
@@ -129,6 +129,12 @@ class ChatAnthropic(BaseChatModel):
 
 	@overload
 	async def ainvoke(self, messages: list[BaseMessage], output_format: type[T]) -> ChatInvokeCompletion[T]: ...
+
+	async def ainvoke(
+		self,
+		messages: list[BaseMessage],
+		output_format: type[T] | None = None,
+	) -> ChatInvokeCompletion[T] | ChatInvokeCompletion[str]:
 
 	async def ainvoke(
 		self, messages: list[BaseMessage], output_format: type[T] | None = None
