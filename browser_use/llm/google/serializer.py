@@ -1,13 +1,17 @@
 import base64
+from typing import Any
 
 from google.genai.types import Content, ContentListUnion, Part
 
 from browser_use.llm.messages import (
-	AssistantMessage,
-	BaseMessage,
-	SystemMessage,
-	UserMessage,
+    AssistantMessage,
+    BaseMessage,
+    SystemMessage,
+    UserMessage,
 )
+from browser_use.utils import logger
+
+logger = logger
 
 
 class GoogleMessageSerializer:

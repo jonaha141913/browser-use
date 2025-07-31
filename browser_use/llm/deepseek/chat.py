@@ -48,12 +48,14 @@ class ChatDeepSeek(BaseChatModel):
 		return 'deepseek'
 
 	def _client(self) -> AsyncOpenAI:
-		return AsyncOpenAI(
-			api_key=self.api_key,
-			base_url=self.base_url,
-			timeout=self.timeout,
+		kwargs = {
+			"api_key": self.api_key,
+			"base_url": self.base_url,
+			"timeout": self.timeout,
 			**(self.client_params or {}),
-		)
+		}
+		kwargs = {k: v for k, v in kwargs.items() if v is not None}
+		return AsyncOpenAI(**kwargs)
 
 	@property
 	def name(self) -> str:

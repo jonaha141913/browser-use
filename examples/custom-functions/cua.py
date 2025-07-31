@@ -119,8 +119,8 @@ controller = Controller()
 
 
 @controller.registry.action(
-	'Use OpenAI Computer Use Assistant (CUA) as a fallback when standard browser actions cannot achieve the desired goal. This action sends a screenshot and description to OpenAI CUA and executes the returned computer use actions.',
-	param_model=OpenAICUAAction,
+    'Use OpenAI Computer Use Assistant (CUA) as a fallback when standard browser actions cannot achieve the desired goal. This action sends a screenshot and description to OpenAI CUA and executes the returned computer use actions.',
+    param_model=OpenAICUAAction,
 )
 async def openai_cua_fallback(params: OpenAICUAAction, browser_session: BrowserSession):
 	"""
@@ -200,6 +200,9 @@ async def openai_cua_fallback(params: OpenAICUAAction, browser_session: BrowserS
 
 		action = computer_call.action
 		print(f'🎬 Executing CUA action: {action.type} - {action}')
+
+		if action_result is None:
+			raise Exception('CUA action returned no result')
 
 		action_result = await handle_model_action(page, action)
 		await asyncio.sleep(0.1)

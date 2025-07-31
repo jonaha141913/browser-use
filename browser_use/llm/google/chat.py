@@ -15,6 +15,7 @@ from browser_use.llm.messages import BaseMessage
 from browser_use.llm.schema import SchemaOptimizer
 from browser_use.llm.views import ChatInvokeCompletion, ChatInvokeUsage
 
+
 T = TypeVar('T', bound=BaseModel)
 
 
@@ -195,6 +196,8 @@ class ChatGoogle(BaseChatModel):
 
 		if self.seed is not None:
 			config['seed'] = self.seed
+
+		contents, system_instruction = self._get_contents_and_system_prompt(messages)
 
 		if self.thinking_budget is not None:
 			thinking_config_dict: types.ThinkingConfigDict = {'thinking_budget': self.thinking_budget}
