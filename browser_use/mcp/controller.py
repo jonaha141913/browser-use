@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 try:
 	from mcp import ClientSession, StdioServerParameters
 	from mcp.client.stdio import stdio_client
-	from mcp.types import TextContent, Tool
+	from mcp.types import TextContent, Tool, ToolCallRequestParams
 
 	MCP_AVAILABLE = True
 except ImportError:

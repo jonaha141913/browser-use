@@ -75,7 +75,7 @@ async def get_ax_tree(TARGET_URL):
 		await page.goto(TARGET_URL, wait_until='load')
 
 		ax_tree_interesting = await page.accessibility.snapshot(interesting_only=True)
-		lines = []
+		lines: list[dict] = []
 		flatten_ax_tree(ax_tree_interesting, lines)
 		print(lines)
 		print(f'length of ax_tree_interesting: {len(lines)}')
