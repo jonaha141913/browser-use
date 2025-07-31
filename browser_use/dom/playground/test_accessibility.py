@@ -74,7 +74,31 @@ async def get_ax_tree(TARGET_URL):
 		print(f'Navigating to {TARGET_URL}')
 		await page.goto(TARGET_URL, wait_until='load')
 
-		ax_tree_interesting = await page.accessibility.snapshot(interesting_only=True)
+		# page.accessibility was removed from Playwright; read the tree over CDP instead
+		client = await page.context.new_cdp_session(page)
+		result = await client.send('Accessibility.getFullAXTree')
+		nodes = result.get('nodes', [])
+		nodes_by_id = {node['nodeId']: node for node in nodes}
+
+		def build_nodes(node_id):
+			node = nodes_by_id.get(node_id)
+			if node is None:
+				return []
+			children = [child for child_id in node.get('childIds', []) for child in build_nodes(child_id)]
+			# Skip ignored nodes to mimic interesting_only=True, keeping their children
+			if node.get('ignored'):
+				return children
+			entry = {
+				'role': node.get('role', {}).get('value', ''),
+				'name': node.get('name', {}).get('value', ''),
+			}
+			if children:
+				entry['children'] = children
+			return [entry]
+
+		root = next((node for node in nodes if 'parentId' not in node), None)
+		roots = build_nodes(root['nodeId']) if root else []
+		ax_tree_interesting = roots[0] if roots else None
 		lines = []
 		flatten_ax_tree(ax_tree_interesting, lines)
 		print(lines)

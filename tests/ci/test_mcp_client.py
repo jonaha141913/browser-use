@@ -28,14 +28,28 @@ class MockMCPServer:
 	def _setup_handlers(self):
 		"""Setup MCP server handlers."""
 
-		@self.server.list_tools()
-		async def handle_list_tools() -> list[types.Tool]:
+		async def handle_list_tools(ctx: object, params: types.PaginatedRequestParams | None) -> types.ListToolsResult:
 			"""List available test tools."""
+			return types.ListToolsResult(tools=self._get_tools())
+
+		async def handle_call_tool(ctx: object, params: types.CallToolRequestParams) -> types.CallToolResult:
+			"""Handle tool execution."""
+			content = self._call_tool(params.name, params.arguments)
+			return types.CallToolResult(content=list(content))
+
+		self.server = type(self.server)(
+			self.server.name,
+			on_list_tools=handle_list_tools,
+			on_call_tool=handle_call_tool,
+		)
+
+	def _get_tools(self) -> list[types.Tool]:
+		if True:
 			return [
 				types.Tool(
 					name='count_to_n',
 					description='Count from 1 to n and return the numbers',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {'n': {'type': 'integer', 'description': 'Number to count to'}},
 						'required': ['n'],
@@ -44,7 +58,7 @@ class MockMCPServer:
 				types.Tool(
 					name='echo_message',
 					description='Echo back a message with a prefix',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'message': {'type': 'string', 'description': 'Message to echo'},
@@ -56,12 +70,12 @@ class MockMCPServer:
 				types.Tool(
 					name='get_test_data',
 					description='Get some test data as JSON',
-					inputSchema={'type': 'object', 'properties': {}},
+					input_schema={'type': 'object', 'properties': {}},
 				),
 				types.Tool(
 					name='process_trace_update',
 					description='Process a cognitive trace update with nested object parameter',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'trace': {
@@ -97,7 +111,7 @@ class MockMCPServer:
 				types.Tool(
 					name='process_array_data',
 					description='Process various array types',
-					inputSchema={
+					input_schema={
 						'type': 'object',
 						'properties': {
 							'string_list': {
@@ -133,9 +147,8 @@ class MockMCPServer:
 				),
 			]
 
-		@self.server.call_tool()
-		async def handle_call_tool(name: str, arguments: dict | None) -> list[types.TextContent]:
-			"""Handle tool execution."""
+	def _call_tool(self, name: str, arguments: dict | None) -> list[types.TextContent]:
+		if True:
 			# Record the call
 			self.call_history.append({'tool': name, 'arguments': arguments or {}})
 

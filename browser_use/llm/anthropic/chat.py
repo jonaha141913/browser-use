@@ -136,13 +136,16 @@ class ChatAnthropic(BaseChatModel):
 		anthropic_messages, system_prompt = AnthropicMessageSerializer.serialize_messages(messages)
 
 		try:
+			invoke_params = self._get_client_params_for_invoke()
+			if system_prompt:
+				invoke_params['system'] = system_prompt
+
 			if output_format is None:
 				# Normal completion without structured output
 				response = await self.get_client().messages.create(
 					model=self.model,
 					messages=anthropic_messages,
-					system=system_prompt or NOT_GIVEN,
-					**self._get_client_params_for_invoke(),
+					**invoke_params,
 				)
 
 				# Ensure we have a valid Message object before accessing attributes
@@ -192,9 +195,8 @@ class ChatAnthropic(BaseChatModel):
 					model=self.model,
 					messages=anthropic_messages,
 					tools=[tool],
-					system=system_prompt or NOT_GIVEN,
 					tool_choice=tool_choice,
-					**self._get_client_params_for_invoke(),
+					**invoke_params,
 				)
 
 				# Ensure we have a valid Message object before accessing attributes
